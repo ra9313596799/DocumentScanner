@@ -1,4 +1,4 @@
-const CACHE_NAME = 'DocumentScanner-v1';
+const CACHE_NAME = 'DocumentScanner-v2';
 const urlsToCache = [
   '/DocumentScanner/',
   '/DocumentScanner/index.html',

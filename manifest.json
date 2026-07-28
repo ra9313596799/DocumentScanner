@@ -1,5 +1,5 @@
 {
-  "name": "Document Scanner App",
+  "name": "Document Scanner",
   "short_name": "DocumentScanner",
   "description": "Scan documents quickly and export crystal-clear PDF files.",
   "start_url": "/DocumentScanner",
@@ -8,7 +8,7 @@
   "theme_color": "#000000",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "icon.png?v1",
       "sizes": "192x192",
       "type": "image/png"
     } 
