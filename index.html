@@ -3,6 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Service worker register karne ke liye -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js');
+        });
+    } 
+    </script>
     <!-- Primary Meta Tags -->
     <title>Free Online Document Scanner & PDF Creator | Perfect A4 Crop</title>
     <meta name="title" content="Free Online Document Scanner & PDF Creator | Perfect A4 Crop">
@@ -12,7 +22,7 @@
     <meta name="robots" content="index, follow">
     <meta name="language" content="English">
 
-    <!-- Open Graph / Facebook / WhatsApp (Link share karne par jo card dikhta hai) -->
+    <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://ra9313596799.github.io/DocumentScanner/">
     <meta property="og:title" content="Free Online Document Scanner & PDF Creator">
@@ -26,18 +36,9 @@
     <meta property="twitter:description" content="Easily scan and crop documents or ID cards into perfect A4 size PDFs without installing any app. Secure and works completely offline in your browser.">
     <meta property="twitter:image" content="https://ra9313596799.github.io/DocumentScanner/icon.png">
     
-    <!-- Canonical Tag (Duplicate content se bachne ke liye) -->
+    <!-- Canonical Tag -->
     <link rel="canonical" href="https://ra9313596799.github.io/DocumentScanner/">
-     <!-- Service worker register karne ke liye -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#000000">
-    <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js');
-        });
-    }git rm -r --cached .
-    </script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- OpenCV.js & jsPDF -->
@@ -101,17 +102,19 @@
         .app-container { display: flex; flex: 1; overflow: hidden; }
 
         .workspace {
-            flex: 1; background: var(--bg-workspace); display: flex; justify-content: center; align-items: center;
-            padding:20px; position: relative; overflow: auto;
+            flex: 1; background: var(--bg-workspace); display: flex; 
+            padding:20px; overflow: auto;
         }
         
-        /* Updated Canvas Wrapper with Ruler/Grid Background */
+        /* Updated Canvas Wrapper */
         .canvas-wrapper {
+            margin: auto; 
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); 
             border-radius: 4px; 
-            overflow: hidden;position: absolute; top:15px;
+            overflow: hidden; 
+            position: relative; 
             
-            /* --- Ruler / Grid Background (Chhote Checkbox) --- */
+            /* --- Ruler / Grid Background --- */
             background-color: #ffffff;
             background-image: 
                 linear-gradient(#e2e8f0 1px, transparent 1px),
@@ -120,7 +123,6 @@
                 linear-gradient(90deg, #94a3b8 1px, transparent 1px);
             background-size: 10px 10px, 10px 10px, 50px 50px, 50px 50px;
             background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
-            /* ------------------------------------------------ */
             
             aspect-ratio: 1 / 1.4142; 
             display: flex;
@@ -129,7 +131,6 @@
             max-height: 75vh; 
         }
         
-        /* Updated Canvas styling to fit A4 Wrapper */
         canvas { 
             display: block; 
             cursor: crosshair; 
@@ -219,7 +220,7 @@
     </div>
 
     <header>
-        <h1><i class="fa-solid fa-file-signature"></i>Docu Scan</h1>
+        <h1><i class="fa-solid fa-file-signature"></i>Doc Scan</h1>
         <label class="upload-btn">
             <i class="fa-solid fa-cloud-arrow-up"></i>Upload Doc
             <input type="file" id="uploadInput" accept="image/*">
@@ -394,27 +395,23 @@
         }
 
        function draw(showUI = true) {
-            // Pehle canvas ko puri tarah transparent (clear) karein taaki Grid dikhe
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             const br = brightnessSlider.value;
             const ct = contrastSlider.value;
             const bw = isBlackAndWhite ? 'grayscale(100%)' : '';
             
-            // Image ko draw karein
             ctx.filter = `brightness(${100 + parseInt(br)}%) contrast(${100 + parseInt(ct)}%) ${bw}`;
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             ctx.filter = 'none'; 
 
             if (!isCropped && showUI) {
-                // Overlay Mask (Crop ke bahar wale hisse ko thoda dark dikhane ke liye)
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.beginPath();
                 ctx.moveTo(0, 0); ctx.lineTo(canvas.width, 0); ctx.lineTo(canvas.width, canvas.height); ctx.lineTo(0, canvas.height); ctx.closePath();
                 ctx.moveTo(points[0].x, points[0].y); ctx.lineTo(points[3].x, points[3].y); ctx.lineTo(points[2].x, points[2].y); ctx.lineTo(points[1].x, points[1].y); ctx.closePath();
                 ctx.fill('evenodd');
 
-                // Cropping Box ki Lines
                 ctx.beginPath();
                 ctx.moveTo(points[0].x, points[0].y);
                 for(let i=1; i<4; i++) ctx.lineTo(points[i].x, points[i].y);
@@ -423,7 +420,6 @@
                 ctx.lineWidth = 2.5;
                 ctx.stroke();
 
-                // Pointers (Dots)
                 points.forEach(p => {
                     ctx.beginPath();
                     ctx.arc(p.x, p.y, pointRadius, 0, Math.PI * 2);
@@ -464,8 +460,23 @@
         canvas.addEventListener('mousedown', onPointerDown);
         canvas.addEventListener('mousemove', onPointerMove);
         window.addEventListener('mouseup', onPointerUp);
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); onPointerDown(e); }, {passive: false});
-        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); onPointerMove(e); }, {passive: false});
+
+        // --- MOBILE TOUCH EVENTS FIX ---
+        canvas.addEventListener('touchstart', (e) => { 
+            onPointerDown(e); 
+            if (draggingPoint) {
+                e.preventDefault(); 
+            }
+        }, {passive: false});
+        
+        canvas.addEventListener('touchmove', (e) => { 
+            if (draggingPoint) {
+                e.preventDefault(); 
+                onPointerMove(e); 
+            }
+        }, {passive: false});
+        // --------------------------------
+
         window.addEventListener('touchend', onPointerUp);
 
         cropBtn.addEventListener('click', () => {
@@ -479,7 +490,6 @@
                 points[2].x, points[2].y, points[3].x, points[3].y
             ];
             
-            // 1. Crop kiye gaye area ki actual dimensions nikale bina stretch kiye
             let widthA = Math.hypot(points[2].x - points[3].x, points[2].y - points[3].y);
             let widthB = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
             let cropWidth = Math.max(widthA, widthB);
@@ -497,18 +507,14 @@
             let dst = new cv.Mat();
             cv.warpPerspective(src, dst, M, dsize, cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
 
-            // Temporary canvas me original crop ko draw karein
             let tempCanvas = document.createElement('canvas');
             tempCanvas.width = cropWidth;
             tempCanvas.height = cropHeight;
             cv.imshow(tempCanvas, dst);
             
-            // 2. High-Quality A4 Size ka page define karein
             const A4_WIDTH = 1200;
-            const A4_HEIGHT = Math.round(A4_WIDTH * A4_RATIO); // Approx 1697
+            const A4_HEIGHT = Math.round(A4_WIDTH * A4_RATIO); 
 
-            // 3. Document ko A4 sheet par fit karne ke liye Scale aur Center calculate karein
-            // Thoda padding (margin) add kiya hai taaki document bilkul border par touch na ho (5%)
             const padding = A4_WIDTH * 0.05; 
             const maxDrawWidth = A4_WIDTH - (padding * 2);
             const maxDrawHeight = A4_HEIGHT - (padding * 2);
@@ -518,29 +524,23 @@
             let drawWidth = cropWidth * scale;
             let drawHeight = cropHeight * scale;
 
-            // Center me laane ke liye X aur Y coordinates
             let offsetX = (A4_WIDTH - drawWidth) / 2;
             let offsetY = (A4_HEIGHT - drawHeight) / 2;
 
-            // 4. Main canvas ko A4 sheet banayein aur uspar cropped document draw karein
             canvas.width = A4_WIDTH;
             canvas.height = A4_HEIGHT;
             
-            // Background white karein
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, A4_WIDTH, A4_HEIGHT);
             
-            // Center me ID Card / Document ko draw karein
             ctx.drawImage(tempCanvas, 0, 0, cropWidth, cropHeight, offsetX, offsetY, drawWidth, drawHeight);
             
-            // Filters apply karne ke liye img tag ko update karein
             img.onload = () => {
                 isCropped = true; 
                 draw(true);
             };
             img.src = canvas.toDataURL('image/jpeg', 1.0); 
             
-            // OpenCV memory clear karein
             src.delete(); dst.delete(); M.delete(); srcMat.delete(); dstMat.delete();
             
             addPageBtn.disabled = false;
@@ -575,7 +575,6 @@
             exportCanvas.height = canvas.height;
             const eCtx = exportCanvas.getContext('2d');
             
-            // Export karte waqt background white rakhne ke liye
             eCtx.fillStyle = '#ffffff';
             eCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
             
