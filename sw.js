@@ -1,13 +1,10 @@
-const CACHE_NAME = 'DocumentScanner-v2';
+const CACHE_NAME = 'doc-scan-cache-v1';
 const urlsToCache = [
   '/DocumentScanner/',
   '/DocumentScanner/index.html',
-  // Agar aapki css ya js files hain, toh unka naam bhi yahan dalein jaise:
-  // '/DocumentScanner/style.css',
-  // '/DocumentScanner/script.js'
+  '/DocumentScanner/manifest.json?v2'
 ];
 
-// Install Service Worker
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -17,16 +14,12 @@ self.addEventListener('install', event => {
   );
 });
 
-// Fetching from Cache
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
+        // Return cache hit or fetch from network
+        return response || fetch(event.request);
       })
   );
 });

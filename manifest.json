@@ -1,16 +1,21 @@
 {
-  "name": "Document Scanner",
-  "short_name": "DocumentScanner",
-  "description": "Scan documents quickly and export crystal-clear PDF files.",
-  "start_url": "/DocumentScanner",
+  "name": "Doc Scan Perfect A4",
+  "short_name": "Doc Scan",
+  "description": "Scan and crop documents into perfect A4 size PDFs.",
+  "start_url": "/DocumentScanner/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#09090e",
+  "theme_color": "#09090e",
   "icons": [
     {
-      "src": "icon.png?v1",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
-    } 
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }

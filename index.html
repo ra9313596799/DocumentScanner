@@ -4,14 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Service worker register karne ke liye -->
-    <link rel="manifest" href="manifest.json?v1"/>
+    <link rel="manifest" href="manifest.json?v2"/>
     <meta name="theme-color" content="#09090e"/>
     <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js?v1');
-        });
-    } 
+    // PWA Install Logic
+let deferredPrompt;
+const installAppBtn = document.getElementById('installAppBtn');
+
+// 1. Listen for the beforeinstallprompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent the mini-infobar from appearing on mobile
+    e.preventDefault();
+    // Stash the event so it can be triggered later.
+    deferredPrompt = e;
+    // Show the install button
+    installAppBtn.style.display = 'flex';
+});
+
+// 2. Handle install button click
+installAppBtn.addEventListener('click', async () => {
+    if (deferredPrompt !== null) {
+        // Show the native browser install prompt
+        deferredPrompt.prompt();
+        // Wait for the user to respond
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            console.log('User accepted the PWA prompt');
+        }
+        // Clear the prompt variable
+        deferredPrompt = null;
+        // Hide the button since they interacted with the prompt
+        installAppBtn.style.display = 'none';
+    }
+});
+
+// 3. Hide button if successfully installed
+window.addEventListener('appinstalled', () => {
+    installAppBtn.style.display = 'none';
+    deferredPrompt = null;
+    console.log('PWA was installed successfully');
+});
     </script>
     <!-- Primary Meta Tags -->
     <title>Free Online Document Scanner & PDF Creator | Perfect A4 Crop</title>
@@ -130,6 +162,9 @@ input[type="range"]::-webkit-slider-thumb:hover{transform: scale(1.15);}
 
     <header>
         <h1><i class="fa-solid fa-file-signature"></i>Doc Scan</h1>
+        <button id="installAppBtn" class="upload-btn" style="display: none; background: #10b981; margin-right: 10px;">
+        <i class="fa-solid fa-download"></i> Install App
+    </button>
         <label class="upload-btn">
             <i class="fa-solid fa-cloud-arrow-up"></i>Upload Doc
             <input type="file" id="uploadInput" accept="image/*">
