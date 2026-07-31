@@ -4,46 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Service worker register karne ke liye -->
-    <link rel="manifest" href="manifest.json?v2"/>
+    <link rel="manifest" href="manifest.json?v1"/>
     <meta name="theme-color" content="#09090e"/>
     <script>
-    // PWA Install Logic
-let deferredPrompt;
-const installAppBtn = document.getElementById('installAppBtn');
-
-// 1. Listen for the beforeinstallprompt event
-window.addEventListener('beforeinstallprompt', (e) => {
-    // Prevent the mini-infobar from appearing on mobile
-    e.preventDefault();
-    // Stash the event so it can be triggered later.
-    deferredPrompt = e;
-    // Show the install button
-    installAppBtn.style.display = 'flex';
-});
-
-// 2. Handle install button click
-installAppBtn.addEventListener('click', async () => {
-    if (deferredPrompt !== null) {
-        // Show the native browser install prompt
-        deferredPrompt.prompt();
-        // Wait for the user to respond
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-            console.log('User accepted the PWA prompt');
-        }
-        // Clear the prompt variable
-        deferredPrompt = null;
-        // Hide the button since they interacted with the prompt
-        installAppBtn.style.display = 'none';
-    }
-});
-
-// 3. Hide button if successfully installed
-window.addEventListener('appinstalled', () => {
-    installAppBtn.style.display = 'none';
-    deferredPrompt = null;
-    console.log('PWA was installed successfully');
-});
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js?v1');
+        });
+    } 
     </script>
     <!-- Primary Meta Tags -->
     <title>Free Online Document Scanner & PDF Creator | Perfect A4 Crop</title>
@@ -96,61 +64,60 @@ window.addEventListener('appinstalled', () => {
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         
-body{background: radial-gradient(circle at 50% 0%, #1a1a3a 0%, #09090e 60%); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden;}
-#loading{position: fixed; inset: 0; background: #09090e; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; font-weight: 600; font-size: 1.2rem; color: var(--primary);}
-.spinner{width: 40px; height: 40px; border: 4px solid var(--border); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px;}
-@keyframes spin{0%{transform: rotate(0deg);}
-100%{transform: rotate(360deg);}
-}
-header{display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: rgba(9, 9, 14, 0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); z-index: 10;}
-header h1{font-size: 1.25rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 10px;}
-header h1 i{color: var(--primary);}
-.upload-btn{background: var(--primary); color: white; padding:5px 10px; border-radius: 8px; font-weight: 400; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; font-size: 0.8rem;}
-.upload-btn:hover{background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);}
-input[type="file"]{display: none;}
-.app-container{display: flex; flex: 1; overflow: hidden;}
-.workspace{flex: 1; background: var(--bg-workspace); display: flex; padding:20px; overflow: auto;}
-/* Updated Canvas Wrapper */ .canvas-wrapper{margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); border-radius: 4px; overflow: hidden; position: relative;  /* --- Ruler / Grid Background --- */ background-color: #ffffff; background-image:     linear-gradient(#e2e8f0 1px, transparent 1px),     linear-gradient(90deg, #e2e8f0 1px, transparent 1px),     linear-gradient(#94a3b8 1px, transparent 1px),     linear-gradient(90deg, #94a3b8 1px, transparent 1px); background-size: 10px 10px, 10px 10px, 50px 50px, 50px 50px; background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px; aspect-ratio: 1 / 1.4142; display: flex; justify-content: center; align-items: center; max-height: 75vh;}
-canvas{display: block; cursor: crosshair; max-width: 100%; max-height: 100%; object-fit: contain;}
-.sidebar{width: 380px; background: var(--surface); display: flex; flex-direction: column; border-left: 1px solid var(--border); height: 100%; backdrop-filter: blur(10px);}
-.tabs{display: flex; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); padding: 5px 5px 0 5px;}
-.tab-btn{flex: 1; padding: 15px; text-align: center; font-weight: 600; color: var(--text-muted); cursor: pointer; border: none; background: none; font-size: 0.95rem; border-radius: 8px 8px 0 0; transition: 0.2s;}
-.tab-btn:hover{color: var(--text-main); background: var(--surface-hover);}
-.tab-btn.active{color: var(--primary); background: transparent; border-bottom: 2px solid var(--primary);}
-.tab-content{flex: 1; overflow-y: auto; display: none; flex-direction: column; padding:15px;}
-.tab-content.active{display: flex;}
-.section-title{font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; margin-bottom: 15px;}
-.action-grid{display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 25px;}
-button{padding: 12px 15px; border: none; border-radius: 8px; font-weight: 500; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;}
-button:disabled{opacity: 0.4; cursor: not-allowed; pointer-events: none;}
-.btn-outline{background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-main);}
-.btn-outline:hover{background: rgba(255,255,255,0.1);}
-.btn-crop{background: var(--primary); color: white;}
-.btn-crop:hover{background: var(--primary-hover);}
-.btn-danger{background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);}
-.btn-danger:hover{background: rgba(239, 68, 68, 0.25);}
-.btn-add{background: var(--success); color: white; width: 100%; margin-top: auto; padding: 15px; font-size: 1rem;}
-.btn-add:hover{background: #059669;}
-.slider-group{margin-bottom: 20px;}
-.slider-header{display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 500; margin-bottom: 10px; color: var(--text-main);}
-input[type="range"]{-webkit-appearance: none; width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 5px; outline: none;}
-input[type="range"]::-webkit-slider-thumb{-webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--primary); cursor: pointer; transition: 0.1s; box-shadow: 0 0 10px rgba(99, 102, 241, 0.6);}
-input[type="range"]::-webkit-slider-thumb:hover{transform: scale(1.15);}
-.gallery-header-info{text-align: center; margin-bottom: 20px; font-size: 0.95rem; color: var(--text-muted);}
-.thumbnail-list{display: flex; flex-direction: column; gap: 15px; flex: 1;}
-.thumb-card{background: rgba(0,0,0,0.2); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--border);}
-.thumb-card-header{display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: 600;}
-.thumb-card img{width: 100%; height: 140px; object-fit: contain; background: #fff; border-radius: 6px; border: 1px solid var(--border);}
-.btn-export-pdf{background: var(--primary); color: white; width: 100%; padding: 15px; font-size: 1rem; margin-top: 20px;}
-.btn-export-pdf:hover{background: var(--primary-hover);}
-.empty-state{text-align: center; padding: 40px 20px; color: var(--text-muted);}
-.empty-state i{font-size: 3rem; margin-bottom: 15px; color: rgba(255,255,255,0.1);}
-@media (max-width: 900px){body{padding-bottom: 50px;}
-.app-container{flex-direction: column; position: relative;}
-.workspace{flex: 0 0 45vh; padding: 15px; min-height: 250px;}
-.sidebar{width: 100%; flex: 1; min-height: 0; border-left: none; border-top: 1px solid var(--border);}
-}
-
+        body{background: radial-gradient(circle at 50% 0%, #1a1a3a 0%, #09090e 60%); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden;}
+        #loading{position: fixed; inset: 0; background: #09090e; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; font-weight: 600; font-size: 1.2rem; color: var(--primary);}
+        .spinner{width: 40px; height: 40px; border: 4px solid var(--border); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px;}
+        @keyframes spin{0%{transform: rotate(0deg);}
+        100%{transform: rotate(360deg);}
+        }
+        header{display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: rgba(9, 9, 14, 0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); z-index: 10;}
+        header h1{font-size: 1.25rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 10px;}
+        header h1 i{color: var(--primary);}
+        .upload-btn{background: var(--primary); color: white; padding:5px 10px; border-radius: 8px; font-weight: 400; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; font-size: 0.8rem;}
+        .upload-btn:hover{background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);}
+        input[type="file"]{display: none;}
+        .app-container{display: flex; flex: 1; overflow: hidden;}
+        .workspace{flex: 1; background: var(--bg-workspace); display: flex; padding:20px; overflow: auto;}
+        /* Updated Canvas Wrapper */ .canvas-wrapper{margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); border-radius: 4px; overflow: hidden; position: relative;  /* --- Ruler / Grid Background --- */ background-color: #ffffff; background-image:     linear-gradient(#e2e8f0 1px, transparent 1px),     linear-gradient(90deg, #e2e8f0 1px, transparent 1px),     linear-gradient(#94a3b8 1px, transparent 1px),     linear-gradient(90deg, #94a3b8 1px, transparent 1px); background-size: 10px 10px, 10px 10px, 50px 50px, 50px 50px; background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px; aspect-ratio: 1 / 1.4142; display: flex; justify-content: center; align-items: center; max-height: 75vh;}
+        canvas{display: block; cursor: crosshair; max-width: 100%; max-height: 100%; object-fit: contain;}
+        .sidebar{width: 380px; background: var(--surface); display: flex; flex-direction: column; border-left: 1px solid var(--border); height: 100%; backdrop-filter: blur(10px);}
+        .tabs{display: flex; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); padding: 5px 5px 0 5px;}
+        .tab-btn{flex: 1; padding: 15px; text-align: center; font-weight: 600; color: var(--text-muted); cursor: pointer; border: none; background: none; font-size: 0.95rem; border-radius: 8px 8px 0 0; transition: 0.2s;}
+        .tab-btn:hover{color: var(--text-main); background: var(--surface-hover);}
+        .tab-btn.active{color: var(--primary); background: transparent; border-bottom: 2px solid var(--primary);}
+        .tab-content{flex: 1; overflow-y: auto; display: none; flex-direction: column; padding:15px;}
+        .tab-content.active{display: flex;}
+        .section-title{font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; margin-bottom: 15px;}
+        .action-grid{display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 25px;}
+        button{padding: 12px 15px; border: none; border-radius: 8px; font-weight: 500; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;}
+        button:disabled{opacity: 0.4; cursor: not-allowed; pointer-events: none;}
+        .btn-outline{background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-main);}
+        .btn-outline:hover{background: rgba(255,255,255,0.1);}
+        .btn-crop{background: var(--primary); color: white;}
+        .btn-crop:hover{background: var(--primary-hover);}
+        .btn-danger{background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);}
+        .btn-danger:hover{background: rgba(239, 68, 68, 0.25);}
+        .btn-add{background: var(--success); color: white; width: 100%; margin-top: auto; padding: 15px; font-size: 1rem;}
+        .btn-add:hover{background: #059669;}
+        .slider-group{margin-bottom: 20px;}
+        .slider-header{display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 500; margin-bottom: 10px; color: var(--text-main);}
+        input[type="range"]{-webkit-appearance: none; width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 5px; outline: none;}
+        input[type="range"]::-webkit-slider-thumb{-webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--primary); cursor: pointer; transition: 0.1s; box-shadow: 0 0 10px rgba(99, 102, 241, 0.6);}
+        input[type="range"]::-webkit-slider-thumb:hover{transform: scale(1.15);}
+        .gallery-header-info{text-align: center; margin-bottom: 20px; font-size: 0.95rem; color: var(--text-muted);}
+        .thumbnail-list{display: flex; flex-direction: column; gap: 15px; flex: 1;}
+        .thumb-card{background: rgba(0,0,0,0.2); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--border);}
+        .thumb-card-header{display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: 600;}
+        .thumb-card img{width: 100%; height: 140px; object-fit: contain; background: #fff; border-radius: 6px; border: 1px solid var(--border);}
+        .btn-export-pdf{background: var(--primary); color: white; width: 100%; padding: 15px; font-size: 1rem; margin-top: 20px;}
+        .btn-export-pdf:hover{background: var(--primary-hover);}
+        .empty-state{text-align: center; padding: 40px 20px; color: var(--text-muted);}
+        .empty-state i{font-size: 3rem; margin-bottom: 15px; color: rgba(255,255,255,0.1);}
+        @media (max-width: 900px){body{padding-bottom: 50px;}
+        .app-container{flex-direction: column; position: relative;}
+        .workspace{flex: 0 0 45vh; padding: 15px; min-height: 250px;}
+        .sidebar{width: 100%; flex: 1; min-height: 0; border-left: none; border-top: 1px solid var(--border);}
+        }
     </style>
 </head>
 <body>
@@ -582,6 +549,43 @@ input[type="range"]::-webkit-slider-thumb:hover{transform: scale(1.15);}
             });
             
             doc.save('DocuScan_Document.pdf');
+        });
+
+        // --- PWA INSTALLATION LOGIC ---
+        let deferredPrompt;
+        const installAppBtn = document.getElementById('installAppBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Browser ka default install prompt rokna
+            e.preventDefault();
+            // Event ko save karna taaki baad me button click par use kar sakein
+            deferredPrompt = e;
+            // Install button ko show karna
+            installAppBtn.style.display = 'flex'; 
+        });
+
+        installAppBtn.addEventListener('click', async () => {
+            if (deferredPrompt !== null) {
+                // Prompt dikhana
+                deferredPrompt.prompt();
+                // User ka response wait karna (Accept kiya ya Reject)
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                } else {
+                    console.log('User dismissed the install prompt');
+                }
+                // Prompt ek hi baar use hota hai, isliye isko null kar dein
+                deferredPrompt = null;
+                // Button ko hide kar dein
+                installAppBtn.style.display = 'none';
+            }
+        });
+
+        // Agar app successfully install ho jaye toh button ko hide kar dena
+        window.addEventListener('appinstalled', (e) => {
+            installAppBtn.style.display = 'none';
+            console.log('App successfully installed!');
         });
     </script>
 </body>
