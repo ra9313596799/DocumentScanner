@@ -1,16 +1,17 @@
 {
-  "name": "Doc Scan Perfect A4",
-  "short_name": "Doc Scan",
-  "description": "Scan and crop documents into perfect A4 size PDFs.",
-  "start_url": "/DocumentScanner/",
+  "name": "Free Document Scanner",
+  "short_name": "DocScan",
+  "id": "/DocumentScanner/",                  
+  "start_url": "/DocumentScanner/index.html", 
+  "scope": "/DocumentScanner/",               
   "display": "standalone",
-  "background_color": "#09090e",
   "theme_color": "#09090e",
+  "background_color": "#1a1a3a",
   "icons": [
     {
       "src": "icon.png",
       "sizes": "192x192",
       "type": "image/png"
-    } 
+    }
   ]
 }

@@ -1,8 +1,8 @@
-const CACHE_NAME = 'doc-scan-cache-v1';
+const CACHE_NAME = 'doc-scanner-cache-v1';
 const urlsToCache = [
-  '/DocumentScanner/',
-  '/DocumentScanner/index.html',
-  '/DocumentScanner/manifest.json?v2'
+  '/DocumentScanner/?v4',
+  '/DocumentScanner/index.html?v4',
+  '/DocumentScanner/manifest.json?v4'
 ];
 
 self.addEventListener('install', event => {

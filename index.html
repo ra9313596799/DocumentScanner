@@ -4,15 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Service worker register karne ke liye -->
-    <link rel="manifest" href="manifest.json?v1"/>
+    <link rel="manifest" href="manifest.json?v4"/>
     <meta name="theme-color" content="#09090e"/>
-    <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js?v1');
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // यहाँ हमने { scope: '/DocumentScanner/' } ऐड कर दिया है
+        navigator.serviceWorker.register('sw.js?v4', { scope: '/DocumentScanner/' })
+        .then((registration) => {
+            console.log('DocScanner Service Worker registered with scope:', registration.scope);
         });
-    } 
-    </script>
+    });
+} 
+</script>
     <!-- Primary Meta Tags -->
     <title>Free Online Document Scanner & PDF Creator | Perfect A4 Crop</title>
     <meta name="title" content="Free Online Document Scanner & PDF Creator | Perfect A4 Crop">
